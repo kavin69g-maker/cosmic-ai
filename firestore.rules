@@ -1,0 +1,16 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users can READ their own profile (to show plan/quota in the UI),
+    // but can NEVER write to it directly. All writes happen through
+    // Cloud Functions (chat / verifyPurchase), which use the Admin SDK
+    // and bypass these rules. This stops anyone from editing their own
+    // plan to "premium" via the browser console or a hacked APK.
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+  }
+}
