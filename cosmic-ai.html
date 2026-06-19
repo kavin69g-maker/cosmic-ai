@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cosmic AI</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --black:#0A0A0A;
+    --black-soft:#141414;
+    --black-card:#1A1A1A;
+    --white:#FAFAFA;
+    --white-dim:#C9C9C9;
+    --white-faint:#7A7A7A;
+    --line:#2C2C2C;
+    --line-soft:#1F1F1F;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    background:var(--black);
+    color:var(--white);
+    font-family:'Inter', -apple-system, sans-serif;
+    overflow:hidden;
+  }
+  .screen{
+    height:100vh;
+    width:100%;
+    display:none;
+    flex-direction:column;
+  }
+  .screen.active{ display:flex; }
+  button{ font-family:inherit; cursor:pointer; }
+  ::selection{ background:var(--white); color:var(--black); }
+
+  /* ============ SHARED ============ */
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .brand .mark{
+    width:30px;height:30px;
+    border:1.5px solid var(--white);
+    border-radius:50%;
+    position:relative;
+    flex:0 0 auto;
+  }
+  .brand .mark::before{
+    content:'';
+    position:absolute;
+    top:50%;left:50%;
+    width:6px;height:6px;
+    background:var(--white);
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+  }
+  .brand .mark::after{
+    content:'';
+    position:absolute;
+    top:3px;left:3px;right:3px;bottom:3px;
+    border:1px solid var(--line);
+    border-radius:50%;
+  }
+  .brand .name{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:18px;
+    font-weight:600;
+    letter-spacing:0.3px;
+  }
+
+  /* ============ LOGIN SCREEN ============ */
+  #login{
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    position:relative;
+  }
+  .stars{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+  }
+  .star{
+    position:absolute;
+    width:2px;height:2px;
+    background:var(--white-faint);
+    border-radius:50%;
+  }
+  .login-card{
+    width:100%;
+    max-width:380px;
+    z-index:1;
+    text-align:center;
+  }
+  .login-card .brand{
+    justify-content:center;
+    margin-bottom:34px;
+  }
+  .login-card .brand .name{ font-size:24px; }
+  .login-card h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:22px;
+    font-weight:600;
+    margin:0 0 8px;
+  }
+  .login-card .sub{
+    color:var(--white-faint);
+    font-size:13.5px;
+    margin:0 0 32px;
+    line-height:1.5;
+  }
+  .auth-btn{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    background:var(--white);
+    color:var(--black);
+    border:1px solid var(--white);
+    border-radius:8px;
+    padding:13px;
+    font-size:14.5px;
+    font-weight:500;
+    margin-bottom:12px;
+    transition:opacity .15s ease, transform .1s ease;
+  }
+  .auth-btn:hover{ opacity:0.88; }
+  .auth-btn:active{ transform:scale(0.985); }
+  .auth-btn.google svg{ width:17px; height:17px; }
+  .divider{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin:22px 0;
+    color:var(--white-faint);
+    font-size:11.5px;
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+  }
+  .divider::before, .divider::after{
+    content:'';
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+  .email-form{ text-align:left; }
+  .field{ margin-bottom:14px; }
+  .field label{
+    display:block;
+    font-size:12px;
+    color:var(--white-faint);
+    margin-bottom:6px;
+  }
+  .field input{
+    width:100%;
+    background:var(--black-soft);
+    border:1px solid var(--line);
+    color:var(--white);
+    border-radius:7px;
+    padding:11px 13px;
+    font-size:14px;
+    font-family:inherit;
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  .field input:focus{ border-color:var(--white); }
+  .field input::placeholder{ color:var(--white-faint); }
+  .submit-btn{
+    width:100%;
+    background:transparent;
+    color:var(--white);
+    border:1px solid var(--white);
+    border-radius:8px;
+    padding:13px;
+    font-size:14.5px;
+    font-weight:500;
+    margin-top:6px;
+    transition:background .15s ease, color .15s ease;
+  }
+  .submit-btn:hover{ background:var(--white); color:var(--black); }
+  .form-error{
+    color:#E8E8E8;
+    background:var(--black-card);
+    border:1px solid var(--line);
+    border-left:2px solid var(--white);
+    font-size:12.5px;
+    padding:9px 12px;
+    border-radius:5px;
+    margin-bottom:14px;
+    display:none;
+    text-align:left;
+  }
+  .form-error.show{ display:block; }
+  .toggle-mode{
+    margin-top:20px;
+    font-size:13px;
+    color:var(--white-faint);
+  }
+  .toggle-mode button{
+    background:none;
+    border:none;
+    color:var(--white);
+    text-decoration:underline;
+    font-size:13px;
+    padding:0;
+  }
+  .mockup-note{
+    margin-top:26px;
+    font-size:11px;
+    color:var(--white-faint);
+    line-height:1.6;
+    border-top:1px solid var(--line-soft);
+    padding-top:16px;
+  }
+  .mockup-note b{ color:var(--white-dim); font-weight:500; }
+
+  /* ============ TIER SCREEN ============ */
+  #tiers{
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .tier-wrap{
+    width:100%;
+    max-width:760px;
+    text-align:center;
+  }
+  .tier-wrap .brand{ justify-content:center; margin-bottom:8px; }
+  .tier-wrap h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:26px;
+    font-weight:600;
+    margin:18px 0 6px;
+  }
+  .tier-wrap .sub{
+    color:var(--white-faint);
+    font-size:14px;
+    margin:0 0 36px;
+  }
+  .tier-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+    text-align:left;
+  }
+  @media (max-width:620px){ .tier-grid{ grid-template-columns:1fr; } }
+  .tier-card{
+    background:var(--black-soft);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:26px 24px;
+    display:flex;
+    flex-direction:column;
+    cursor:pointer;
+    transition:border-color .15s ease, transform .12s ease;
+    position:relative;
+  }
+  .tier-card:hover{ border-color:var(--white-dim); transform:translateY(-2px); }
+  .tier-card.recommended{ border-color:var(--white); }
+  .tier-badge{
+    position:absolute;
+    top:-11px;
+    left:24px;
+    background:var(--white);
+    color:var(--black);
+    font-size:10.5px;
+    font-weight:600;
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+    padding:4px 10px;
+    border-radius:20px;
+  }
+  .tier-name{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:18px;
+    font-weight:600;
+    margin:6px 0 4px;
+  }
+  .tier-price{
+    font-size:28px;
+    font-weight:600;
+    font-family:'Space Grotesk', sans-serif;
+    margin:10px 0 4px;
+  }
+  .tier-price span{
+    font-size:13px;
+    color:var(--white-faint);
+    font-weight:400;
+    font-family:'Inter', sans-serif;
+  }
+  .tier-list{
+    list-style:none;
+    padding:0;
+    margin:18px 0 22px;
+    flex:1;
+  }
+  .tier-list li{
+    font-size:13px;
+    color:var(--white-dim);
+    padding:7px 0;
+    border-top:1px solid var(--line-soft);
+    display:flex;
+    align-items:center;
+    gap:9px;
+  }
+  .tier-list li:first-child{ border-top:none; }
+  .tier-list li .ic{
+    width:14px; height:14px;
+    flex:0 0 auto;
+    opacity:0.85;
+  }
+  .tier-select-btn{
+    width:100%;
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--white);
+    border-radius:8px;
+    padding:11px;
+    font-size:13.5px;
+    font-weight:500;
+    transition:background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .tier-card.recommended .tier-select-btn{
+    background:var(--white);
+    color:var(--black);
+    border-color:var(--white);
+  }
+  .tier-select-btn:hover{ background:var(--white); color:var(--black); border-color:var(--white); }
+  .tier-foot{
+    margin-top:26px;
+    font-size:11px;
+    color:var(--white-faint);
+  }
+
+  /* ============ CHAT SCREEN ============ */
+  #chat{
+    flex-direction:column;
+  }
+  .chat-header{
+    flex:0 0 auto;
+    padding:14px 22px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .chat-header .left{ display:flex; align-items:center; gap:12px; }
+  .plan-pill{
+    font-size:10.5px;
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+    border:1px solid var(--line);
+    color:var(--white-dim);
+    padding:3px 9px;
+    border-radius:20px;
+    font-weight:500;
+  }
+  .plan-pill.premium{ border-color:var(--white); color:var(--white); }
+  .chat-header .right{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .icon-btn{
+    background:none;
+    border:1px solid var(--line);
+    color:var(--white-dim);
+    border-radius:7px;
+    padding:7px 12px;
+    font-size:12px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .icon-btn:hover{ border-color:var(--white-dim); color:var(--white); }
+
+  .chat-body{
+    flex:1 1 auto;
+    overflow-y:auto;
+    padding:28px 6%;
+  }
+  .chat-body::-webkit-scrollbar{ width:9px; }
+  .chat-body::-webkit-scrollbar-thumb{ background:var(--line); border-radius:5px; }
+  .chat-body::-webkit-scrollbar-track{ background:transparent; }
+
+  .msg{
+    max-width:700px;
+    margin:0 auto 22px;
+  }
+  .msg-meta{
+    font-size:11px;
+    color:var(--white-faint);
+    margin-bottom:6px;
+    letter-spacing:0.3px;
+  }
+  .msg.user .msg-meta{ text-align:right; }
+  .msg-bubble{
+    font-size:15px;
+    line-height:1.65;
+    white-space:pre-wrap;
+  }
+  .msg.user .msg-bubble{
+    background:var(--white);
+    color:var(--black);
+    border-radius:14px 14px 3px 14px;
+    padding:12px 16px;
+    display:inline-block;
+    max-width:80%;
+    float:right;
+    clear:both;
+  }
+  .msg.assistant .msg-bubble{
+    color:var(--white-dim);
+    border-left:2px solid var(--line);
+    padding-left:14px;
+  }
+  .msg.assistant .msg-bubble strong{ color:var(--white); }
+  .msg.assistant .msg-bubble code{
+    font-family:'IBM Plex Mono', monospace;
+    background:var(--black-card);
+    border:1px solid var(--line);
+    padding:1px 5px;
+    border-radius:4px;
+    font-size:0.87em;
+  }
+  .msg-bubble p{ margin:0 0 11px; }
+  .msg-bubble p:last-child{ margin-bottom:0; }
+  .clearfix::after{ content:''; display:table; clear:both; }
+
+  .typing-row{
+    max-width:700px;
+    margin:0 auto 22px;
+    font-size:12px;
+    color:var(--white-faint);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .typing-row .dots span{
+    display:inline-block;
+    width:4px;height:4px;
+    border-radius:50%;
+    background:var(--white-faint);
+    margin-right:3px;
+    animation:pulse 1.1s infinite ease-in-out;
+  }
+  .typing-row .dots span:nth-child(2){ animation-delay:.15s; }
+  .typing-row .dots span:nth-child(3){ animation-delay:.3s; }
+  @keyframes pulse{ 0%,80%,100%{opacity:.25;} 40%{opacity:1;} }
+
+  .welcome-chat{
+    max-width:600px;
+    margin:8vh auto;
+    text-align:center;
+  }
+  .welcome-chat .mark-big{
+    width:50px;height:50px;
+    border:1.5px solid var(--white);
+    border-radius:50%;
+    position:relative;
+    margin:0 auto 22px;
+  }
+  .welcome-chat .mark-big::before{
+    content:'';
+    position:absolute;
+    top:50%;left:50%;
+    width:9px;height:9px;
+    background:var(--white);
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+  }
+  .welcome-chat h2{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:24px;
+    font-weight:600;
+    margin:0 0 10px;
+  }
+  .welcome-chat p{
+    color:var(--white-faint);
+    font-size:14px;
+    line-height:1.6;
+    margin:0 0 28px;
+  }
+  .suggest-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  @media (max-width:560px){ .suggest-grid{ grid-template-columns:1fr; } }
+  .suggest-card{
+    text-align:left;
+    background:var(--black-soft);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:13px;
+    color:var(--white-dim);
+    transition:border-color .15s ease;
+  }
+  .suggest-card:hover{ border-color:var(--white-dim); }
+  .suggest-card .lbl{
+    display:block;
+    font-size:10px;
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+    color:var(--white-faint);
+    margin-bottom:5px;
+  }
+
+  .limit-banner{
+    max-width:700px;
+    margin:0 auto 20px;
+    background:var(--black-soft);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:13px 16px;
+    font-size:13px;
+    color:var(--white-dim);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .limit-banner button{
+    background:var(--white);
+    color:var(--black);
+    border:none;
+    border-radius:7px;
+    padding:7px 13px;
+    font-size:12.5px;
+    font-weight:500;
+    flex:0 0 auto;
+  }
+
+  .chat-input-bar{
+    flex:0 0 auto;
+    border-top:1px solid var(--line);
+    padding:14px 6%;
+    background:var(--black-soft);
+  }
+  .chat-input-wrap{
+    max-width:700px;
+    margin:0 auto;
+    display:flex;
+    align-items:flex-end;
+    gap:10px;
+    background:var(--black);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:8px 8px 8px 16px;
+    transition:border-color .15s ease;
+  }
+  .chat-input-wrap:focus-within{ border-color:var(--white-dim); }
+  .chat-input-wrap textarea{
+    flex:1;
+    background:none;
+    border:none;
+    outline:none;
+    resize:none;
+    color:var(--white);
+    font-family:'Inter', sans-serif;
+    font-size:14.5px;
+    line-height:1.5;
+    max-height:140px;
+    padding:7px 0;
+  }
+  .chat-input-wrap textarea::placeholder{ color:var(--white-faint); }
+  .chat-send{
+    flex:0 0 auto;
+    background:var(--white);
+    color:var(--black);
+    border:none;
+    border-radius:7px;
+    width:36px;height:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:15px;
+    transition:opacity .15s ease, transform .1s ease;
+  }
+  .chat-send:hover{ opacity:0.85; }
+  .chat-send:active{ transform:scale(0.94); }
+  .chat-send:disabled{ background:var(--line); color:var(--white-faint); cursor:not-allowed; }
+  .chat-hint{
+    max-width:700px;
+    margin:8px auto 0;
+    font-size:10.5px;
+    color:var(--white-faint);
+    display:flex;
+    justify-content:space-between;
+  }
+
+  .img-mockup{
+    margin-top:10px;
+    border:1px dashed var(--line);
+    border-radius:10px;
+    padding:18px;
+    font-size:12.5px;
+    color:var(--white-faint);
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ SCREEN 1: LOGIN ============ -->
+<div class="screen active" id="login">
+  <div class="stars" id="stars"></div>
+  <div class="login-card">
+    <div class="brand"><span class="mark"></span><span class="name">Cosmic AI</span></div>
+    <h1>Welcome</h1>
+    <p class="sub">Sign in to explore physics, biology, space, and everything in between.</p>
+
+    <button class="auth-btn google" id="googleBtn">
+      <svg viewBox="0 0 24 24"><path fill="#000" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#000" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.99.66-2.25 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#000" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#000" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continue with Google
+    </button>
+
+    <div class="divider">or</div>
+
+    <form class="email-form" id="emailForm">
+      <div class="form-error" id="formError"></div>
+      <div class="field">
+        <label for="emailInput">Email</label>
+        <input type="email" id="emailInput" placeholder="you@example.com" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="passInput">Password</label>
+        <input type="password" id="passInput" placeholder="••••••••" required autocomplete="current-password" minlength="6">
+      </div>
+      <button type="submit" class="submit-btn" id="emailSubmitBtn">Sign in</button>
+    </form>
+
+    <div class="toggle-mode">
+      <span id="toggleText">Don't have an account?</span> <button id="toggleBtn">Sign up</button>
+    </div>
+
+    <div class="mockup-note">
+      <b>Demo note:</b> Email sign-in is fully functional within this session (validated and stored locally). Google sign-in is a styled placeholder — real Google OAuth requires a backend server and registered credentials, which this environment can't host.
+    </div>
+  </div>
+</div>
+
+<!-- ============ SCREEN 2: TIER SELECT ============ -->
+<div class="screen" id="tiers">
+  <div class="tier-wrap">
+    <div class="brand"><span class="mark"></span><span class="name">Cosmic AI</span></div>
+    <h1>Choose how you explore</h1>
+    <p class="sub">You can switch plans anytime from the chat screen.</p>
+
+    <div class="tier-grid">
+      <div class="tier-card recommended" data-tier="free">
+        <span class="tier-badge">Start here</span>
+        <div class="tier-name">Free</div>
+        <div class="tier-price">$0 <span>/ forever</span></div>
+        <ul class="tier-list">
+          <li><span class="ic">●</span>Full science chatbot access</li>
+          <li><span class="ic">●</span>20 messages per day</li>
+          <li><span class="ic">●</span>Physics, biology, space, oceans & more</li>
+          <li><span class="ic">●</span>Scientist & experiment deep-dives</li>
+        </ul>
+        <button class="tier-select-btn">Continue free</button>
+      </div>
+
+      <div class="tier-card" data-tier="premium">
+        <div class="tier-name">Premium</div>
+        <div class="tier-price">$9 <span>/ month</span></div>
+        <ul class="tier-list">
+          <li><span class="ic">●</span>Everything in Free</li>
+          <li><span class="ic">●</span>Unlimited messages</li>
+          <li><span class="ic">●</span>Science image generation</li>
+          <li><span class="ic">●</span>Priority response speed</li>
+        </ul>
+        <button class="tier-select-btn">Go premium</button>
+      </div>
+    </div>
+
+    <div class="tier-foot">Demo note: premium unlocks the UI and features below — no real payment is charged in this preview.</div>
+  </div>
+</div>
+
+<!-- ============ SCREEN 3: CHAT ============ -->
+<div class="screen" id="chat">
+  <div class="chat-header">
+    <div class="left">
+      <div class="brand"><span class="mark"></span><span class="name">Cosmic AI</span></div>
+      <span class="plan-pill" id="planPill">Free</span>
+    </div>
+    <div class="right">
+      <button class="icon-btn" id="upgradeBtn">Upgrade</button>
+      <button class="icon-btn" id="logoutBtn">Sign out</button>
+    </div>
+  </div>
+
+  <div class="chat-body" id="chatBody">
+    <div class="welcome-chat" id="welcomeChat">
+      <div class="mark-big"></div>
+      <h2>Ask Cosmic AI anything</h2>
+      <p>Physics, chemistry, biology, quantum mechanics, space, oceans, animals — or the scientists behind it all.</p>
+      <div class="suggest-grid">
+        <div class="suggest-card" data-q="What was Marie Curie's biggest experimental failure?"><span class="lbl">Scientists</span>Marie Curie's costliest mistake</div>
+        <div class="suggest-card" data-q="Explain quantum entanglement simply."><span class="lbl">Quantum</span>What entanglement really means</div>
+        <div class="suggest-card" data-q="How do octopuses think with neurons in their arms?"><span class="lbl">Animals</span>The octopus's distributed mind</div>
+        <div class="suggest-card" data-q="What lives at the bottom of the Mariana Trench?"><span class="lbl">Ocean</span>Life at crushing depth</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-input-bar">
+    <div class="limit-banner" id="limitBanner" style="display:none;">
+      <span id="limitText">You've used all 20 free messages today.</span>
+      <button id="limitUpgradeBtn">Upgrade</button>
+    </div>
+    <div class="chat-input-wrap">
+      <textarea id="chatInput" rows="1" placeholder="Ask about a phenomenon, a creature, an experiment, a scientist..."></textarea>
+      <button class="chat-send" id="chatSendBtn">↑</button>
+    </div>
+    <div class="chat-hint">
+      <span>Powered by Claude</span>
+      <span id="quotaHint">20 messages left today</span>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= STATE ================= */
+let session = { email: null, plan: 'free' };
+let dailyUsed = 0;
+const DAILY_LIMIT = 20;
+let history = [];
+let busy = false;
+let isSignupMode = false;
+
+/* ================= STARFIELD ================= */
+(function initStars(){
+  const field = document.getElementById('stars');
+  const n = 60;
+  for(let i=0;i<n;i++){
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = Math.random()*100+'%';
+    s.style.top = Math.random()*100+'%';
+    s.style.opacity = (Math.random()*0.6+0.2).toFixed(2);
+    field.appendChild(s);
+  }
+})();
+
+/* ================= SCREEN SWITCH ================= */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ================= LOGIN ================= */
+const emailForm = document.getElementById('emailForm');
+const formError = document.getElementById('formError');
+const toggleBtn = document.getElementById('toggleBtn');
+const toggleText = document.getElementById('toggleText');
+const emailSubmitBtn = document.getElementById('emailSubmitBtn');
+
+toggleBtn.addEventListener('click', () => {
+  isSignupMode = !isSignupMode;
+  emailSubmitBtn.textContent = isSignupMode ? 'Create account' : 'Sign in';
+  toggleText.textContent = isSignupMode ? 'Already have an account?' : "Don't have an account?";
+  toggleBtn.textContent = isSignupMode ? 'Sign in' : 'Sign up';
+  formError.classList.remove('show');
+});
+
+function showError(msg){
+  formError.textContent = msg;
+  formError.classList.add('show');
+}
+
+emailForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  formError.classList.remove('show');
+  const email = document.getElementById('emailInput').value.trim();
+  const pass = document.getElementById('passInput').value;
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!emailPattern.test(email)){
+    showError('Enter a valid email address.');
+    return;
+  }
+  if(pass.length < 6){
+    showError('Password must be at least 6 characters.');
+    return;
+  }
+
+  const usersKey = 'cosmic_users';
+  let users = {};
+  try{ users = JSON.parse(window.name.indexOf('cosmic_users:') === 0 ? window.name.slice(13) : '{}') || {}; }catch(e){ users = {}; }
+
+  // simple in-memory store for this session only (no localStorage per artifact rules)
+  if(!window.__cosmicUsers) window.__cosmicUsers = {};
+  const store = window.__cosmicUsers;
+
+  if(isSignupMode){
+    if(store[email]){
+      showError('An account with this email already exists. Try signing in instead.');
+      return;
+    }
+    store[email] = pass;
+  }else{
+    if(!store[email]){
+      showError('No account found with this email. Try signing up instead.');
+      return;
+    }
+    if(store[email] !== pass){
+      showError('Incorrect password.');
+      return;
+    }
+  }
+
+  session.email = email;
+  goToTierSelect();
+});
+
+document.getElementById('googleBtn').addEventListener('click', () => {
+  // Mockup: real Google OAuth requires a backend + registered client ID
+  session.email = 'demo.user@gmail.com';
+  goToTierSelect();
+});
+
+function goToTierSelect(){
+  showScreen('tiers');
+}
+
+/* ================= TIER SELECT ================= */
+document.querySelectorAll('.tier-card').forEach(card => {
+  card.querySelector('.tier-select-btn').addEventListener('click', () => {
+    session.plan = card.getAttribute('data-tier');
+    enterChat();
+  });
+});
+
+function enterChat(){
+  const pill = document.getElementById('planPill');
+  pill.textContent = session.plan === 'premium' ? 'Premium' : 'Free';
+  pill.classList.toggle('premium', session.plan === 'premium');
+  updateQuotaUI();
+  showScreen('chat');
+  document.getElementById('chatInput').focus();
+}
+
+document.getElementById('upgradeBtn').addEventListener('click', () => {
+  if(session.plan === 'premium'){
+    return;
+  }
+  showScreen('tiers');
+});
+document.getElementById('limitUpgradeBtn').addEventListener('click', () => {
+  showScreen('tiers');
+});
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  session = { email: null, plan: 'free' };
+  dailyUsed = 0;
+  history = [];
+  document.getElementById('chatBody').innerHTML = '';
+  document.getElementById('emailInput').value = '';
+  document.getElementById('passInput').value = '';
+  showScreen('login');
+});
+
+/* ================= CHAT ================= */
+const chatBody = document.getElementById('chatBody');
+const welcomeChat = document.getElementById('welcomeChat');
+const chatInput = document.getElementById('chatInput');
+const chatSendBtn = document.getElementById('chatSendBtn');
+const limitBanner = document.getElementById('limitBanner');
+const quotaHint = document.getElementById('quotaHint');
+let entryCount = 0;
+
+const SYSTEM_PROMPT = `You are Cosmic AI, a science companion covering physics, chemistry, biology, quantum mechanics, space, oceans, animals, and the lives/experiments of scientists (including their failures, not just their triumphs).
+
+Style:
+- Write like a sharp, enthusiastic expert explaining things to a curious friend — clear, vivid, precise, never condescending.
+- Favor concrete detail over vague abstraction: specific numbers, dates, names, mechanisms.
+- When discussing scientists, treat failure as genuinely interesting, not just a prelude to success — explain what went wrong, why, and what it taught the field.
+- Use short paragraphs. Avoid bullet-point overload; prefer flowing prose, using lists only when genuinely clarifying.
+- Never invent facts, studies, quotes, or experiments. If uncertain about a specific fact, say so plainly rather than guessing.
+- Keep responses focused: usually 2-5 short paragraphs unless asked for depth.`;
+
+function autoGrow(){
+  chatInput.style.height = 'auto';
+  chatInput.style.height = Math.min(chatInput.scrollHeight, 140) + 'px';
+}
+chatInput.addEventListener('input', autoGrow);
+chatInput.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter' && !e.shiftKey){
+    e.preventDefault();
+    sendMessage();
+  }
+});
+chatSendBtn.addEventListener('click', sendMessage);
+document.querySelectorAll('.suggest-card').forEach(el => {
+  el.addEventListener('click', () => {
+    chatInput.value = el.getAttribute('data-q');
+    sendMessage();
+  });
+});
+
+function updateQuotaUI(){
+  if(session.plan === 'premium'){
+    quotaHint.textContent = 'Unlimited messages';
+    limitBanner.style.display = 'none';
+  }else{
+    const left = Math.max(0, DAILY_LIMIT - dailyUsed);
+    quotaHint.textContent = left + ' messages left today';
+    if(left <= 0){
+      limitBanner.style.display = 'flex';
+      chatInput.disabled = true;
+      chatInput.placeholder = 'Daily limit reached — upgrade for unlimited access';
+    }else{
+      limitBanner.style.display = 'none';
+      chatInput.disabled = false;
+      chatInput.placeholder = 'Ask about a phenomenon, a creature, an experiment, a scientist...';
+    }
+  }
+}
+
+function escapeHtml(str){
+  return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function formatBubble(text){
+  const escaped = escapeHtml(text);
+  const withInline = escaped
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`(.+?)`/g, '<code>$1</code>');
+  return withInline.split(/\n\n+/).map(p => `<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
+}
+
+function addMessage(role, text){
+  if(welcomeChat) welcomeChat.remove();
+  entryCount++;
+  const wrap = document.createElement('div');
+  wrap.className = `msg ${role} clearfix`;
+  const label = role === 'user' ? 'You' : 'Cosmic AI';
+  wrap.innerHTML = `
+    <div class="msg-meta">${label}</div>
+    <div class="msg-bubble">${role === 'user' ? escapeHtml(text) : formatBubble(text)}</div>
+  `;
+  chatBody.appendChild(wrap);
+  chatBody.scrollTop = chatBody.scrollHeight;
+  return wrap;
+}
+
+function addTyping(){
+  const el = document.createElement('div');
+  el.className = 'typing-row';
+  el.id = 'typingRow';
+  el.innerHTML = `<span class="dots"><span></span><span></span><span></span></span> thinking…`;
+  chatBody.appendChild(el);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+function removeTyping(){
+  const el = document.getElementById('typingRow');
+  if(el) el.remove();
+}
+
+function isImageRequest(text){
+  return /\b(generate|create|draw|make).{0,20}(image|picture|diagram|illustration|photo)\b/i.test(text);
+}
+
+async function sendMessage(){
+  const text = chatInput.value.trim();
+  if(!text || busy) return;
+  if(session.plan === 'free' && dailyUsed >= DAILY_LIMIT){
+    updateQuotaUI();
+    return;
+  }
+
+  busy = true;
+  chatSendBtn.disabled = true;
+  chatInput.value = '';
+  autoGrow();
+
+  addMessage('user', text);
+  history.push({ role: 'user', content: text });
+
+  if(session.plan === 'free') dailyUsed++;
+  updateQuotaUI();
+
+  // Premium-only image feature: mockup, since no image-gen backend is available
+  if(session.plan === 'premium' && isImageRequest(text)){
+    const wrap = addMessage('assistant', "Image generation is a premium feature placeholder in this preview — it isn't wired up to a real image model yet. Here's what I can tell you in words instead:");
+    addTyping();
+  }else{
+    addTyping();
+  }
+
+  try{
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: history
+      })
+    });
+    const data = await response.json();
+    removeTyping();
+
+    let replyText = "";
+    if(data && data.content){
+      replyText = data.content.map(b => b.text || "").join("\n").trim();
+    }
+    if(!replyText){
+      replyText = "I couldn't form a response to that — try rephrasing.";
+    }
+    addMessage('assistant', replyText);
+    history.push({ role: 'assistant', content: replyText });
+  }catch(err){
+    removeTyping();
+    addMessage('assistant', "The connection failed. Try again in a moment.");
+    console.error(err);
+  }finally{
+    busy = false;
+    chatSendBtn.disabled = false;
+    chatInput.focus();
+  }
+}
+</script>
+
+</body>
+</html>
